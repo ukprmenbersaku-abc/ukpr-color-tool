@@ -1,14 +1,61 @@
+
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Palette } from './types';
 import { generatePalettes, isValidHex, getColorByName } from './utils/color';
 import ColorInput from './components/ColorInput';
 import PaletteDisplay from './components/PaletteDisplay';
+import SettingsModal from './components/SettingsModal';
 
 const App: React.FC = () => {
   const [baseColor, setBaseColor] = useState<string>('#3b82f6');
   const [inputValue, setInputValue] = useState<string>('#3b82f6');
   const [palettes, setPalettes] = useState<Palette[]>([]);
-  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>('desktop');
+  
+  // Initialize viewMode based on window width automatically
+  const [viewMode, setViewMode] = useState<'desktop' | 'mobile'>(() => {
+    if (typeof window !== 'undefined') {
+      return window.innerWidth < 768 ? 'mobile' : 'desktop';
+    }
+    return 'desktop';
+  });
+
+  // --- Theme Management ---
+  const [theme, setTheme] = useState<'light' | 'dark' | 'system'>(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('theme');
+      return (saved as 'light' | 'dark' | 'system') || 'system';
+    }
+    return 'system';
+  });
+
+  useEffect(() => {
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(theme);
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  // --- Color Format Management ---
+  const [colorFormat, setColorFormat] = useState<'hex' | 'rgb' | 'hsl'>(() => {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('colorFormat');
+        return (saved as 'hex' | 'rgb' | 'hsl') || 'hex';
+      }
+      return 'hex';
+  });
+
+  useEffect(() => {
+      localStorage.setItem('colorFormat', colorFormat);
+  }, [colorFormat]);
+
+
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -82,36 +129,20 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen font-sans text-slate-800 dark:text-slate-200 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
-      <main className="max-w-7xl mx-auto">
+    <div className="min-h-screen font-sans text-slate-800 dark:text-slate-200 p-4 sm:p-6 lg:p-8 overflow-x-hidden transition-colors duration-300">
+      <main className="max-w-7xl mx-auto relative">
+        {/* Header Actions */}
         <div className="flex justify-end mb-4">
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline text-sm text-slate-500 dark:text-slate-400">表示切替:</span>
-            <div className="flex p-1 bg-slate-200 dark:bg-slate-700 rounded-full">
-              <button
-                  onClick={() => setViewMode('desktop')}
-                  className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${
-                    viewMode === 'desktop'
-                      ? 'bg-white text-blue-600 shadow'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-300/50 dark:hover:bg-slate-600/50'
-                  }`}
-                  aria-pressed={viewMode === 'desktop'}
-                >
-                  PC
-                </button>
-                <button
-                  onClick={() => setViewMode('mobile')}
-                  className={`px-3 py-1 text-sm font-semibold rounded-full transition-colors ${
-                    viewMode === 'mobile'
-                      ? 'bg-white text-blue-600 shadow'
-                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-300/50 dark:hover:bg-slate-600/50'
-                  }`}
-                  aria-pressed={viewMode === 'mobile'}
-                >
-                  モバイル
-                </button>
-            </div>
-          </div>
+          <button
+            onClick={() => setIsSettingsOpen(true)}
+            className="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+            aria-label="設定を開く"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
         </div>
         
         <header className="text-center mb-8 md:mb-12">
@@ -134,6 +165,7 @@ const App: React.FC = () => {
                 description={p.description} 
                 colors={p.colors} 
                 isMobileView={false}
+                colorFormat={colorFormat}
               />
             ))}
           </div>
@@ -151,6 +183,7 @@ const App: React.FC = () => {
                       description={p.description} 
                       colors={p.colors} 
                       isMobileView={true}
+                      colorFormat={colorFormat}
                     />
                 </div>
               ))}
@@ -194,6 +227,18 @@ const App: React.FC = () => {
           </p>
           <p>&copy; 2024 Google AI Studio</p>
         </footer>
+
+        {/* Settings Modal */}
+        <SettingsModal 
+          isOpen={isSettingsOpen} 
+          onClose={() => setIsSettingsOpen(false)} 
+          viewMode={viewMode}
+          setViewMode={setViewMode}
+          theme={theme}
+          setTheme={setTheme}
+          colorFormat={colorFormat}
+          setColorFormat={setColorFormat}
+        />
       </main>
     </div>
   );

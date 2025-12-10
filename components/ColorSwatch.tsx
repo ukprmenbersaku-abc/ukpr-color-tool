@@ -1,9 +1,10 @@
 
 import React, { useState } from 'react';
-import { getContrastYIQ } from '../utils/color';
+import { getContrastYIQ, hexToRgbString, hexToHslString } from '../utils/color';
 
 interface ColorSwatchProps {
   color: string;
+  format?: 'hex' | 'rgb' | 'hsl';
 }
 
 const CopyIcon: React.FC<{ className?: string }> = ({ className }) => (
@@ -19,12 +20,25 @@ const CheckIcon: React.FC<{ className?: string }> = ({ className }) => (
 );
 
 
-const ColorSwatch: React.FC<ColorSwatchProps> = ({ color }) => {
+const ColorSwatch: React.FC<ColorSwatchProps> = ({ color, format = 'hex' }) => {
   const [copied, setCopied] = useState(false);
   const textColor = getContrastYIQ(color) > 128 ? 'text-slate-800' : 'text-white';
 
+  const getDisplayValue = () => {
+    switch (format) {
+        case 'rgb':
+            return hexToRgbString(color);
+        case 'hsl':
+            return hexToHslString(color);
+        default:
+            return color;
+    }
+  };
+
+  const displayValue = getDisplayValue();
+
   const handleCopy = () => {
-    navigator.clipboard.writeText(color);
+    navigator.clipboard.writeText(displayValue);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -38,14 +52,14 @@ const ColorSwatch: React.FC<ColorSwatchProps> = ({ color }) => {
       <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
       <div className={`relative font-mono text-sm tracking-wide transition-all duration-300 ${textColor}`}>
         <div className={`absolute -top-6 -right-2 transition-opacity duration-300 ${copied ? 'opacity-100' : 'opacity-0'}`}>
-          <span className="text-xs bg-slate-900/80 text-white px-2 py-1 rounded-md">コピーしました！</span>
+          <span className="text-xs bg-slate-900/80 text-white px-2 py-1 rounded-md whitespace-nowrap z-10">コピーしました！</span>
         </div>
         <div className="flex items-center space-x-2 opacity-0 group-hover:opacity-100">
             {copied ? <CheckIcon className="w-4 h-4" /> : <CopyIcon className="w-4 h-4" />}
-            <span>{color}</span>
+            <span>{displayValue}</span>
         </div>
         <div className="absolute inset-0 flex items-end justify-start p-2 opacity-100 group-hover:opacity-0">
-             <span>{color}</span>
+             <span>{displayValue}</span>
         </div>
       </div>
     </div>

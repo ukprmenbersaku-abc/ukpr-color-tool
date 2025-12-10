@@ -291,6 +291,21 @@ const hslToRgb = ({ h, s, l }: HSL): RGB => {
   return { r: r * 255, g: g * 255, b: b * 255 };
 };
 
+// --- String Format Converters ---
+export const hexToRgbString = (hex: string): string => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  return `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`;
+};
+
+export const hexToHslString = (hex: string): string => {
+  const rgb = hexToRgb(hex);
+  if (!rgb) return hex;
+  const hsl = rgbToHsl(rgb);
+  return `hsl(${Math.round(hsl.h)}, ${Math.round(hsl.s * 100)}%, ${Math.round(hsl.l * 100)}%)`;
+};
+
+
 // --- Contrast Calculation ---
 export const getContrastYIQ = (hex: string): number => {
   const rgb = hexToRgb(hex);
@@ -336,16 +351,26 @@ export const generatePalettes = (baseHex: string): Palette[] => {
       name: 'シェード (Shades)',
       description: 'ベースの色に黒を混ぜた色。深みと重厚感を与えます。',
       colors: Array.from({ length: 4 }, (_, i) => {
-        const l = Math.max(0, baseHsl.l - (i * 0.15));
-        return rgbToHex(hslToRgb({ ...baseHsl, l }));
+        if (i === 0) return baseHex;
+        const targetL = 0.05;
+        if (baseHsl.l <= targetL) return baseHex;
+        
+        const step = (baseHsl.l - targetL) / 3;
+        const l = baseHsl.l - (i * step);
+        return rgbToHex(hslToRgb({ ...baseHsl, l: Math.max(0, l) }));
       }),
     },
     {
       name: 'ティント (Tints)',
       description: 'ベースの色に白を混ぜた色。明るく軽やかな印象を与えます。',
       colors: Array.from({ length: 4 }, (_, i) => {
-        const l = Math.min(1, baseHsl.l + (i * 0.15));
-        return rgbToHex(hslToRgb({ ...baseHsl, l }));
+        if (i === 0) return baseHex;
+        const targetL = 0.98;
+        if (baseHsl.l >= targetL) return baseHex;
+
+        const step = (targetL - baseHsl.l) / 3;
+        const l = baseHsl.l + (i * step);
+        return rgbToHex(hslToRgb({ ...baseHsl, l: Math.min(1, l) }));
       }),
     },
     {

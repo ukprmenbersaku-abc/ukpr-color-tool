@@ -4,7 +4,7 @@ export default {
     "./index.html",
     "./**/*.{js,ts,jsx,tsx}",
   ],
-  darkMode: 'media',
+  darkMode: 'class', // 'media' から 'class' に変更して手動切り替えに対応
   theme: {
     extend: {
       colors: {

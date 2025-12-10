@@ -4,11 +4,21 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>カラーパレットジェネレーター</title>
-    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     
     <!-- プレビュー環境用: Tailwind CSS CDN -->
     <!-- ローカル開発(Vite)ではPostCSSが処理しますが、プレビュー環境ではこのCDNがスタイルを適用します -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        darkMode: 'class',
+        theme: {
+          extend: {
+            colors: {}
+          }
+        }
+      }
+    </script>
     
     <!-- プレビュー環境用: Import Map -->
     <!-- ブラウザで直接モジュールを解決するために必要です -->
