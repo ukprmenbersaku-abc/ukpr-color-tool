@@ -1,5 +1,5 @@
 
-import { Palette } from './types';
+import { Palette } from '../types';
 
 // --- Type Definitions ---
 type RGB = { r: number; g: number; b: number };

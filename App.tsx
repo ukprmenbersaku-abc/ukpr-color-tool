@@ -3,7 +3,6 @@ import { Palette } from './types';
 import { generatePalettes, isValidHex, getColorByName } from './utils/color';
 import ColorInput from './components/ColorInput';
 import PaletteDisplay from './components/PaletteDisplay';
-import ShadesTintsDisplay from './components/ShadesTintsDisplay';
 
 const App: React.FC = () => {
   const [baseColor, setBaseColor] = useState<string>('#3b82f6');
@@ -82,41 +81,6 @@ const App: React.FC = () => {
     }
   };
 
-  // Helper to get render items (combining shades/tints)
-  const getRenderItems = () => {
-    const items: React.ReactNode[] = [];
-    const standardPalettes = palettes.filter(p => !p.name.includes('Shades') && !p.name.includes('Tints'));
-    const shades = palettes.find(p => p.name.includes('Shades'));
-    const tints = palettes.find(p => p.name.includes('Tints'));
-
-    standardPalettes.forEach(p => {
-      items.push(
-        <PaletteDisplay 
-          key={p.name} 
-          name={p.name} 
-          description={p.description} 
-          colors={p.colors} 
-          isMobileView={viewMode === 'mobile'}
-        />
-      );
-    });
-
-    if (shades && tints) {
-      items.push(
-        <ShadesTintsDisplay 
-          key="shades-tints" 
-          shades={shades} 
-          tints={tints} 
-          isMobileView={viewMode === 'mobile'} 
-        />
-      );
-    }
-
-    return items;
-  };
-
-  const renderItems = getRenderItems();
-
   return (
     <div className="min-h-screen font-sans text-slate-800 dark:text-slate-200 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
       <main className="max-w-7xl mx-auto">
@@ -163,7 +127,15 @@ const App: React.FC = () => {
         
         {viewMode === 'desktop' ? (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-            {renderItems}
+            {palettes.map((p) => (
+              <PaletteDisplay 
+                key={p.name} 
+                name={p.name} 
+                description={p.description} 
+                colors={p.colors} 
+                isMobileView={false}
+              />
+            ))}
           </div>
         ) : (
           <div className="mt-8">
@@ -172,14 +144,19 @@ const App: React.FC = () => {
               className="flex overflow-x-auto snap-x snap-mandatory scroll-smooth no-scrollbar -mx-4 px-4"
               style={{ paddingBottom: '1rem' }}
             >
-              {renderItems.map((item, index) => (
+              {palettes.map((p, index) => (
                 <div key={index} className="flex-shrink-0 w-full snap-center px-2">
-                   {item}
+                   <PaletteDisplay 
+                      name={p.name} 
+                      description={p.description} 
+                      colors={p.colors} 
+                      isMobileView={true}
+                    />
                 </div>
               ))}
             </div>
             <div className="flex justify-center items-center space-x-2 mt-4">
-              {renderItems.map((_, index) => (
+              {palettes.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => handleDotClick(index)}
@@ -193,7 +170,28 @@ const App: React.FC = () => {
           </div>
         )}
         
-        <footer className="text-center mt-16 text-slate-500 dark:text-slate-400">
+        <footer className="text-center mt-16 text-slate-500 dark:text-slate-400 text-sm">
+          <p className="mb-2">
+            カラーパレットジェネレーターを利用する際は、
+            <a 
+              href="https://ukpr-riyoukiyaku.pages.dev/#/tos/general" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 dark:text-blue-400 hover:underline mx-1"
+            >
+              UKPR共通利用規約
+            </a>
+            、
+            <a 
+              href="https://ukpr-riyoukiyaku.pages.dev/#/tos/color-palette" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="text-blue-500 dark:text-blue-400 hover:underline mx-1"
+            >
+              カラーパレットジェネレーター利用規約
+            </a>
+            に同意したこととみなします。
+          </p>
           <p>&copy; 2024 Google AI Studio</p>
         </footer>
       </main>
