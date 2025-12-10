@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>簡易カラーパレット作成ツール</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    
+    <!-- プレビュー環境用: Tailwind CSS CDN -->
+    <!-- ローカル開発(Vite)ではPostCSSが処理しますが、プレビュー環境ではこのCDNがスタイルを適用します -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- プレビュー環境用: Import Map -->
+    <!-- ブラウザで直接モジュールを解決するために必要です -->
+    <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client",
+    "react/jsx-runtime": "https://esm.sh/react@18.3.1/jsx-runtime",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/",
+    "react/": "https://aistudiocdn.com/react@^19.2.1/",
+    "vite": "https://aistudiocdn.com/vite@^7.2.7",
+    "@vitejs/plugin-react": "https://aistudiocdn.com/@vitejs/plugin-react@^5.1.2"
+  }
+}
+</script>
+  </head>
+  <body class="bg-slate-100 dark:bg-slate-900">
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>
